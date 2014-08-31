@@ -48,16 +48,16 @@ This is done by setting the name of the ring as a buffer-local variable"
       (message "Added!"))))
 
 (defun rings-remove-buffer (key)
- "Remove current buffer to ring attached to KEY.
+  "Remove current buffer to ring attached to KEY.
 
 This is done by killing local variable ring-KEY"
   (let ((variable-name (intern (format "rings-%s" key))))
     (when (boundp variable-name)
-    (kill-local-variable variable-name)
-    (message "Removed!"))))
+      (kill-local-variable variable-name)
+      (message "Removed!"))))
 
 (defun rings-toggle-buffer (key)
-"Togger belonging of current-buffer to the KEY ring"
+  "Togger belonging of current-buffer to the KEY ring"
   (let ((variable-name (intern (format "rings-%s" key))))
     (if (boundp variable-name)
         (rings-remove-buffer key)
@@ -82,7 +82,7 @@ Note: this is done going through all buffer checkying if they belong to KEY ring
             (let ((new (or (cadr all) (car buffers))))
               (switch-to-buffer (get-buffer new))
               (rings->> buffers (mapcar (lambda (b)
-                                     (if (equal b new) (format "((%s))" b) b
+					  (if (equal b new) (format "((%s))" b) b
                                         ; <taylanub> konr: I'm not sure if that's a good idea; the message-area is
                                         ;  supposed to print the object in an unambiguous way ...
                                         ;
@@ -90,9 +90,9 @@ Note: this is done going through all buffer checkying if they belong to KEY ring
                                         ;'font-lock-face '(:weight
                                         ;bold :foreground
                                         ;"#ff0000")) b
-                                         )))
-                   (mapcar (lambda (x) (concat x " ")))
-                   (apply #'concat) message))))))
+					      )))
+			(mapcar (lambda (x) (concat x " ")))
+			(apply #'concat) message))))))
 
 (defvar rings-protect-buffers-in-rings t)
 
@@ -114,7 +114,9 @@ Note: this is done going through all buffer checkying if they belong to KEY ring
 ;;;###autoload
 (defmacro rings-generate-toggler (key)
   "Generate a toggler function for the KEY ring."
-  `(lambda () (interactive) (rings-toggle-buffer ,key)))
+  `(lambda () (interactive)
+     ,(format "Ring toogling function for the ring named ring-%s" key)
+     (rings-toggle-buffer ,key)))
 
 ;;;###autoload
 (defalias 'rings-generate-setter 'rings-generate-toggler
@@ -123,17 +125,23 @@ Note: this is done going through all buffer checkying if they belong to KEY ring
 ;;;###autoload
 (defmacro rings-generate-adder (key)
   "Generate a adder function for the KEY ring."
- `(lambda () (interactive) (rings-add-buffer ,key)))
+  `(lambda () (interactive)
+     ,(format "Ring adding function for the ring named ring-%s" key)
+     (rings-add-buffer ,key)))
 
 ;;;###autoload
 (defmacro rings-generate-remover (key)
   "Generate a remover function for the KEY ring."
-  `(lambda () (interactive) (rings-remove-buffer ,key)))
+  `(lambda () (interactive)
+     ,(format "Ring Removing function for the ring named ring-%s" key)
+     (rings-remove-buffer ,key)))
 
 ;;;###autoload
 (defmacro rings-generate-cycler (key)
   "Generate a cycler function for the KEY ring."
-  `(lambda () (interactive) (rings-cycle ,key)))
+  `(lambda () (interactive)
+     ,(format "Ring cycling function for the ring named ring-%s" key)
+     (rings-cycle ,key)))
 
 
 (provide 'rings)
