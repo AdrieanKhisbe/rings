@@ -33,9 +33,13 @@
           (list form x))
       `(rings->> (rings->> ,x ,form) ,@more))))
 
-(defvar rings-used-rings '())
+(defvar rings-used-rings '()
+  "List of buffer rings")
 
 (defun rings-add-buffer (key)
+  "Add current buffer to ring attached to KEY.
+
+This is done by setting the name of the ring as a buffer-local variable"
   (let ((variable-name (intern (format "rings-%s" key))))
     (unless (member variable-name rings-used-rings)
       (add-to-list 'rings-used-rings variable-name))
@@ -44,23 +48,31 @@
       (message "Added!"))))
 
 (defun rings-remove-buffer (key)
+ "Remove current buffer to ring attached to KEY.
+
+This is done by killing local variable ring-KEY"
   (let ((variable-name (intern (format "rings-%s" key))))
     (when (boundp variable-name)
     (kill-local-variable variable-name)
     (message "Removed!"))))
 
 (defun rings-toggle-buffer (key)
+"Togger belonging of current-buffer to the KEY ring"
   (let ((variable-name (intern (format "rings-%s" key))))
     (if (boundp variable-name)
         (rings-remove-buffer key)
       (rings-add-buffer key))))
 
 (defun rings-buffers (key)
+  "Retrieve all the buffers attached to the KEY ring.
+
+Note: this is done going through all buffer checkying if they belong to KEY ring."
   (remove-if-not
    (lambda (x) (assoc (intern (format "rings-%s" key)) (buffer-local-variables x)))
    (buffer-list)))
 
 (defun rings-cycle (key)
+  "Perform a 'Cycle' in KEY ring."
   (let ((buffers (sort (mapcar #'buffer-name (rings-buffers key)) #'string<))
         (current (buffer-name (current-buffer))))
     (if (not buffers) (message "Empty group!")
@@ -101,21 +113,26 @@
 
 ;;;###autoload
 (defmacro rings-generate-toggler (key)
+  "Generate a toggler function for the KEY ring."
   `(lambda () (interactive) (rings-toggle-buffer ,key)))
 
 ;;;###autoload
-(defalias 'rings-generate-setter 'rings-generate-toggler)
+(defalias 'rings-generate-setter 'rings-generate-toggler
+  "Generate a toggler function for the KEY ring.")
 
 ;;;###autoload
 (defmacro rings-generate-adder (key)
-  `(lambda () (interactive) (rings-add-buffer ,key)))
+  "Generate a adder function for the KEY ring."
+ `(lambda () (interactive) (rings-add-buffer ,key)))
 
 ;;;###autoload
 (defmacro rings-generate-remover (key)
+  "Generate a remover function for the KEY ring."
   `(lambda () (interactive) (rings-remove-buffer ,key)))
 
 ;;;###autoload
 (defmacro rings-generate-cycler (key)
+  "Generate a cycler function for the KEY ring."
   `(lambda () (interactive) (rings-cycle ,key)))
 
 
