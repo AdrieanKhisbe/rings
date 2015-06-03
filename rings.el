@@ -20,9 +20,15 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-;; Code goes here
-(require 'cl)
+;;; Commentary:
 
+;; Manage buffer ring to easily switch between them without being
+;; drawn by the huge number or unrelated buffer that `switch-buffer'
+;; will give
+
+;;; Code:
+
+(require 'cl)
 
 (defmacro rings->> (x &optional form &rest more)
   "Like clojure's ->>"
@@ -34,7 +40,7 @@
       `(rings->> (rings->> ,x ,form) ,@more))))
 
 (defvar rings-used-rings '()
-  "List of buffer rings")
+  "List of buffer rings.")
 
 (defun rings-add-buffer (key)
   "Add current buffer to ring attached to KEY.
@@ -57,7 +63,7 @@ This is done by killing local variable ring-KEY"
       (message "Removed from rings-%s!" key))))
 
 (defun rings-toggle-buffer (key)
-  "Togger belonging of current-buffer to the KEY ring"
+  "Togger belonging of current-buffer to the KEY ring."
   (let ((variable-name (intern (format "rings-%s" key))))
     (if (boundp variable-name)
         (rings-remove-buffer key)
